@@ -1,0 +1,1207 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#7C3AED" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Plecak Helenki" />
+  <link rel="manifest" href="./manifest.json" />
+  <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
+  <link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png" />
+  <title>Plecak Helenki – Lista Pakowania</title>
+  <style>
+    :root {
+      --bg: #F5F3FF;
+      --card: #FFFFFF;
+      --primary: #7C3AED;
+      --primary-light: #EDE9FE;
+      --primary-dark: #5B21B6;
+      --accent: #EC4899;
+      --accent-light: #FCE7F3;
+      --success: #10B981;
+      --success-light: #D1FAE5;
+      --warning: #F59E0B;
+      --danger: #EF4444;
+      --text: #1E1B4B;
+      --text-muted: #6B7280;
+      --border: #E5E7EB;
+      --shadow: 0 4px 16px rgba(124, 58, 237, 0.08);
+      --radius: 18px;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.45;
+      padding-bottom: 90px;
+      overflow-x: hidden;
+    }
+
+    /* Sticky Top Header & Progress Bar */
+    .sticky-header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: linear-gradient(135deg, #7C3AED 0%, #DB2777 100%);
+      color: #FFFFFF;
+      padding: calc(14px + env(safe-area-inset-top)) 16px 16px 16px;
+      border-bottom-left-radius: 24px;
+      border-bottom-right-radius: 24px;
+      box-shadow: 0 6px 20px rgba(124, 58, 237, 0.25);
+    }
+
+    .header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .brand-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255, 255, 255, 0.2);
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      backdrop-filter: blur(4px);
+    }
+
+    .offline-pill {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 9px;
+      border-radius: 999px;
+      background: rgba(16, 185, 129, 0.28);
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .offline-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #6EE7B7;
+      display: inline-block;
+    }
+
+    .trip-title-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .trip-title-input {
+      background: rgba(255, 255, 255, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      color: #FFFFFF;
+      font-size: 19px;
+      font-weight: 800;
+      padding: 7px 12px;
+      border-radius: 12px;
+      width: 100%;
+      outline: none;
+      transition: background 0.2s, border-color 0.2s;
+    }
+
+    .trip-title-input:focus {
+      background: rgba(255, 255, 255, 0.26);
+      border-color: #FFFFFF;
+    }
+
+    .progress-card {
+      background: rgba(255, 255, 255, 0.16);
+      border-radius: 16px;
+      padding: 11px 14px;
+      backdrop-filter: blur(6px);
+    }
+
+    .progress-stats {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 7px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .progress-pct {
+      font-size: 20px;
+      font-weight: 900;
+      color: #FDE047;
+    }
+
+    .progress-track {
+      width: 100%;
+      height: 13px;
+      background: rgba(0, 0, 0, 0.22);
+      border-radius: 999px;
+      overflow: hidden;
+      padding: 2px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #34D399 0%, #FDE047 100%);
+      border-radius: 999px;
+      transition: width 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .progress-status-msg {
+      margin-top: 6px;
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.92);
+      font-weight: 500;
+    }
+
+    /* Main Container */
+    .container {
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 14px 14px 24px 14px;
+    }
+
+    /* Template Selector (Wrocław vs Future Trips) */
+    .section-label {
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: var(--primary-dark);
+      margin: 6px 4px 8px 4px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .preset-scroll {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 6px;
+      margin-bottom: 14px;
+      scrollbar-width: none;
+    }
+    .preset-scroll::-webkit-scrollbar {
+      display: none;
+    }
+
+    .preset-btn {
+      flex: 0 0 auto;
+      border: 2px solid var(--border);
+      background: var(--card);
+      color: var(--text);
+      padding: 9px 13px;
+      border-radius: 14px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+      transition: all 0.2s;
+    }
+
+    .preset-btn.active {
+      border-color: var(--primary);
+      background: var(--primary-light);
+      color: var(--primary-dark);
+    }
+
+    /* Celebration Banner */
+    .celebration-banner {
+      display: none;
+      background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+      color: white;
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 16px;
+      text-align: center;
+      box-shadow: 0 8px 20px rgba(16, 185, 129, 0.25);
+      animation: popIn 0.35s ease-out;
+    }
+
+    .celebration-banner.show {
+      display: block;
+    }
+
+    @keyframes popIn {
+      0% { transform: scale(0.92); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    /* Dwarf / Tip Card for Wrocław */
+    .tip-card {
+      background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%);
+      border: 1px solid #FCD34D;
+      color: #78350F;
+      border-radius: 16px;
+      padding: 12px 14px;
+      margin-bottom: 14px;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .tip-icon {
+      font-size: 24px;
+      flex-shrink: 0;
+    }
+
+    /* Controls: Search & Filter */
+    .controls-card {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 12px;
+      margin-bottom: 14px;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+    }
+
+    .search-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .search-input {
+      flex: 1;
+      padding: 10px 12px;
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      font-size: 14px;
+      outline: none;
+    }
+
+    .search-input:focus {
+      border-color: var(--primary);
+    }
+
+    .filter-tabs {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      background: #F3F4F6;
+      padding: 4px;
+      border-radius: 12px;
+    }
+
+    .filter-tab {
+      border: none;
+      background: transparent;
+      padding: 8px 6px;
+      border-radius: 9px;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .filter-tab.active {
+      background: var(--card);
+      color: var(--primary-dark);
+      box-shadow: 0 2px 5px rgba(0,0,0,0.06);
+    }
+
+    /* Quick Add Global Bar */
+    .quick-add-card {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 12px;
+      margin-bottom: 16px;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+    }
+
+    .quick-add-form {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .quick-add-input {
+      flex: 1 1 180px;
+      padding: 10px 12px;
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      font-size: 14px;
+      outline: none;
+    }
+
+    .quick-add-input:focus {
+      border-color: var(--primary);
+    }
+
+    .quick-add-select {
+      flex: 1 1 130px;
+      padding: 10px;
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      font-size: 13px;
+      background: #FFFFFF;
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: #FFFFFF;
+      border: none;
+      border-radius: 12px;
+      padding: 10px 16px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.1s, background 0.2s;
+    }
+
+    .btn-primary:active {
+      transform: scale(0.97);
+    }
+
+    /* Category Cards */
+    .category-card {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 14px;
+      margin-bottom: 14px;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+    }
+
+    .category-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .category-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--text);
+    }
+
+    .category-count {
+      font-size: 12px;
+      font-weight: 700;
+      padding: 3px 9px;
+      border-radius: 999px;
+      background: var(--primary-light);
+      color: var(--primary-dark);
+    }
+
+    .category-count.done {
+      background: var(--success-light);
+      color: #065F46;
+    }
+
+    .cat-progress-track {
+      width: 100%;
+      height: 6px;
+      background: #F3F4F6;
+      border-radius: 999px;
+      overflow: hidden;
+      margin-bottom: 10px;
+    }
+
+    .cat-progress-fill {
+      height: 100%;
+      background: var(--primary);
+      border-radius: 999px;
+      transition: width 0.25s ease;
+    }
+
+    .cat-progress-fill.done {
+      background: var(--success);
+    }
+
+    .item-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .item-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 10px 11px;
+      border-radius: 13px;
+      background: #F9FAFB;
+      border: 1px solid transparent;
+      transition: all 0.15s;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .item-row:active {
+      transform: scale(0.99);
+    }
+
+    .item-row.packed {
+      background: #F0FDF4;
+      border-color: #BBF7D0;
+    }
+
+    .item-left {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .checkbox-custom {
+      width: 24px;
+      height: 24px;
+      border-radius: 8px;
+      border: 2px solid #9CA3AF;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      background: #FFFFFF;
+      transition: all 0.15s;
+      color: transparent;
+      font-size: 14px;
+      font-weight: 900;
+    }
+
+    .item-row.packed .checkbox-custom {
+      background: var(--success);
+      border-color: var(--success);
+      color: #FFFFFF;
+    }
+
+    .item-text {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text);
+      word-break: break-word;
+      transition: color 0.15s;
+    }
+
+    .item-row.packed .item-text {
+      text-decoration: line-through;
+      color: #6B7280;
+    }
+
+    .delete-item-btn {
+      border: none;
+      background: transparent;
+      color: #9CA3AF;
+      font-size: 17px;
+      padding: 4px 8px;
+      border-radius: 8px;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .delete-item-btn:hover,
+    .delete-item-btn:active {
+      color: var(--danger);
+      background: #FEE2E2;
+    }
+
+    /* Bottom Action Buttons */
+    .footer-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 18px;
+      flex-wrap: wrap;
+    }
+
+    .btn-secondary {
+      flex: 1;
+      background: #FFFFFF;
+      color: var(--text);
+      border: 1.5px solid var(--border);
+      padding: 12px;
+      border-radius: 14px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      text-align: center;
+    }
+
+    .btn-danger-outline {
+      flex: 1;
+      background: #FFF1F2;
+      color: #BE123C;
+      border: 1.5px solid #FECDD3;
+      padding: 12px;
+      border-radius: 14px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      text-align: center;
+    }
+
+    /* Modal */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(17, 24, 39, 0.55);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      z-index: 200;
+      backdrop-filter: blur(3px);
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .modal-box {
+      background: #FFFFFF;
+      border-radius: 22px;
+      max-width: 380px;
+      width: 100%;
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 20px 35px rgba(0, 0, 0, 0.2);
+    }
+
+    .modal-title {
+      font-size: 18px;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+
+    .modal-desc {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-bottom: 18px;
+    }
+
+    .modal-buttons {
+      display: flex;
+      gap: 10px;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 24px 12px;
+      color: var(--text-muted);
+      font-size: 14px;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+
+  <header class="sticky-header">
+    <div class="header-top">
+      <div class="brand-badge">🎒 Plecak Helenki • 5 klasa</div>
+      <div class="offline-pill" id="networkStatus">
+        <span class="offline-dot"></span>
+        <span id="networkText">Działa offline</span>
+      </div>
+    </div>
+
+    <div class="trip-title-row">
+      <input
+        type="text"
+        id="tripTitleInput"
+        class="trip-title-input"
+        value="Wycieczka szkolna: Wrocław  dwarf-hunt!  dwarf"
+        aria-label="Nazwa wyjazdu"
+      />
+    </div>
+
+    <div class="progress-card">
+      <div class="progress-stats">
+        <span id="progressCountText">Spakowano: 0 z 0 rzeczy</span>
+        <span class="progress-pct" id="progressPctText">0%</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+      <div class="progress-status-msg" id="progressMessage">
+        Zaczynamy pakowanie! Odznaczaj rzeczy po włożeniu do torby ✨
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="section-label">
+      <span>Wybierz szablon wyjazdu</span>
+      <span style="font-weight:600; text-transform:none; font-size:11px; color:#6B7280;">Możesz przełączać w każdej chwili</span>
+    </div>
+
+    <div class="preset-scroll" id="presetButtons">
+      <button class="preset-btn active" data-preset="wroclaw">🏛️ Szkolna: Wrocław</button>
+      <button class="preset-btn" data-preset="wakacje">☀️ Wakacje i Lato</button>
+      <button class="preset-btn" data-preset="narty">🎿 Zima i Narty</button>
+      <button class="preset-btn" data-preset="weekend">🏡 Weekend / Mazury</button>
+    </div>
+
+    <div class="tip-card" id="tipBanner">
+      <div class="tip-icon">🧙‍♂️</div>
+      <div id="tipText">
+        <strong>Misja Wrocław:</strong> Wygodne buty to podstawa przy szukaniu wrocławskich krasnali, zwiedzaniu Hydropolis, Afrykarium w ZOO i Panoramy Racławickiej!
+      </div>
+    </div>
+
+    <div class="celebration-banner" id="celebrationBanner">
+      <div style="font-size: 28px; margin-bottom: 4px;">🎉🎒✨</div>
+      <div style="font-size: 17px; font-weight: 800;">Brawo Helenka! Wszystko spakowane w 100%!</div>
+      <div style="font-size: 13px; opacity: 0.95; margin-top: 2px;">Plecak zamknięty, możesz ruszać w drogę!</div>
+    </div>
+
+    <div class="controls-card">
+      <div class="search-row">
+        <input
+          type="search"
+          id="searchInput"
+          class="search-input"
+          placeholder="🔍 Szukaj na liście (np. legitymacja, bluza)..."
+        />
+      </div>
+      <div class="filter-tabs">
+        <button class="filter-tab active" data-filter="all">Wszystkie</button>
+        <button class="filter-tab" data-filter="unpacked">Do spakowania</button>
+        <button class="filter-tab" data-filter="packed">Spakowane ✓</button>
+      </div>
+    </div>
+
+    <div class="quick-add-card">
+      <div class="section-label" style="margin-top:0;">➕ Dodaj własną rzecz</div>
+      <form class="quick-add-form" id="addItemForm">
+        <input
+          type="text"
+          id="newItemInput"
+          class="quick-add-input"
+          placeholder="Np. Ulubiona książka, żelki..."
+          required
+        />
+        <select id="newItemCategory" class="quick-add-select"></select>
+        <button type="submit" class="btn-primary">Dodaj</button>
+      </form>
+    </div>
+
+    <div id="categoriesContainer"></div>
+
+    <div class="footer-actions">
+      <button type="button" class="btn-secondary" id="unpackAllBtn">🔄 Rozpakuj wszystko (0%)</button>
+      <button type="button" class="btn-danger-outline" id="resetDefaultBtn">✨ Przywróć domyślną listę</button>
+    </div>
+  </main>
+
+  <!-- Confirmation Modal -->
+  <div class="modal-backdrop" id="confirmModal">
+    <div class="modal-box">
+      <div class="modal-title" id="modalTitle">Potwierdzenie</div>
+      <div class="modal-desc" id="modalDesc">Czy na pewno chcesz kontynuować?</div>
+      <div class="modal-buttons">
+        <button type="button" class="btn-secondary" id="modalCancelBtn">Anuluj</button>
+        <button type="button" class="btn-primary" id="modalConfirmBtn">Tak, wykonaj</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'plecak_helenki_state_v1';
+
+    const PRESETS = {
+      wroclaw: {
+        title: "Wycieczka 5c: Wrocław! 🧙‍♂️🏛️",
+        tip: "<strong>Misja Wrocław:</strong> Wygodne buty to podstawa przy szukaniu wrocławskich krasnali, zwiedzaniu ZOO (Afrykarium), Hydropolis i Rynku!",
+        categories: [
+          {
+            id: "dokumenty",
+            name: "🎫 Dokumenty i Portfel",
+            items: [
+              { id: "w1", text: "Legitymacja szkolna (koniecznie!)", packed: false },
+              { id: "w2", text: "Kieszonkowe (gotówka na pamiątki i krasnale)", packed: false },
+              { id: "w3", text: "Karta płatnicza / drobne na toaletę", packed: false },
+              { id: "w4", text: "Zapisany numer telefonu do Taty i Mamy", packed: false }
+            ]
+          },
+          {
+            id: "plecak_autokar",
+            name: "🚌 Mały plecak do autokaru i na miasto",
+            items: [
+              { id: "w5", text: "Woda w bidonie lub butelce", packed: false },
+              { id: "w6", text: "Kanapki i zdrowe przekąski na drogę", packed: false },
+              { id: "w7", text: "Chusteczki higieniczne i mokre chusteczki", packed: false },
+              { id: "w8", text: "Szkicownik + ołówki / cienkopisy na podróż", packed: false },
+              { id: "w9", text: "Mini gra podróżna / karty do gry ze znajomymi", packed: false },
+              { id: "w10", text: "Mała parasolka lub lekka peleryna przeciwdeszczowa", packed: false }
+            ]
+          },
+          {
+            id: "ubrania",
+            name: "👕 Ubrania i Buty",
+            items: [
+              { id: "w11", text: "Super wygodne buty sportowe do chodzenia", packed: false },
+              { id: "w12", text: "Kurtka przeciwdeszczowa / wiatrówka", packed: false },
+              { id: "w13", text: "Ciepła bluza z kapturem (2 szt.)", packed: false },
+              { id: "w14", text: "Koszulki / T-shirty (na każdy dzień + 1 zapasowa)", packed: false },
+              { id: "w15", text: "Długie wygodne spodnie / jeansy / legginsy (2-3 pary)", packed: false },
+              { id: "w16", text: "Bielizna i skarpetki (na każdy dzień + zapasowe)", packed: false },
+              { id: "w17", text: "Piżama", packed: false },
+              { id: "w18", text: "Kapcie / klapki pod prysznic do pokoju", packed: false }
+            ]
+          },
+          {
+            id: "higiena",
+            name: "🪥 Kosmetyczka i Higiena",
+            items: [
+              { id: "w19", text: "Szczoteczka i pasta do zębów", packed: false },
+              { id: "w20", text: "Szczotka do włosów + zapasowe gumki i spinki", packed: false },
+              { id: "w21", text: "Żel pod prysznic i mały szampon", packed: false },
+              { id: "w22", text: "Ręcznik szybkoschnący lub zwykły", packed: false },
+              { id: "w23", text: "Pomadka ochronna do ust i krem do rąk", packed: false },
+              { id: "w24", text: "Plastry z opatrunkiem (na ewentualne otarcia)", packed: false }
+            ]
+          },
+          {
+            id: "elektronika",
+            name: "📱 Elektronika i Dodatki",
+            items: [
+              { id: "w25", text: "Telefon (naładowany do 100%!)", packed: false },
+              { id: "w26", text: "Ładowarka do telefonu", packed: false },
+              { id: "w27", text: "Powerbank + krótki kabelek (do zdjęć krasnali!)", packed: false },
+              { id: "w28", text: "Słuchawki do autokaru", packed: false },
+              { id: "w29", text: "Reklamówka / worek na brudne ubrania", packed: false }
+            ]
+          }
+        ]
+      },
+      wakacje: {
+        title: "Wakacyjna Wyprawa Helenki ☀️🌴",
+        tip: "<strong>Tryb Wakacyjny:</strong> Pamiętaj o nakryciu głowy, kremie z filtrem UV i stroju kąpielowym!",
+        categories: [
+          {
+            id: "dok_wak",
+            name: "🪪 Dokumenty i Podróż",
+            items: [
+              { id: "s1", text: "Paszport lub Dowód Osobisty + Legitymacja", packed: false },
+              { id: "s2", text: "Portfelik i kieszonkowe", packed: false },
+              { id: "s3", text: "Szkicownik, kredki lub iPad do rysowania", packed: false },
+              { id: "s4", text: "Słuchawki i książka na podróż", packed: false }
+            ]
+          },
+          {
+            id: "lato_ubrania",
+            name: "👗 Letnie Ubrania",
+            items: [
+              { id: "s5", text: "Strój kąpielowy (2 szt.)", packed: false },
+              { id: "s6", text: "Czapka z daszkiem lub kapelusz od słońca", packed: false },
+              { id: "s7", text: "Okulary przeciwsłoneczne", packed: false },
+              { id: "s8", text: "Krótkie spodenki i spódniczki", packed: false },
+              { id: "s9", text: "T-shirty i topy", packed: false },
+              { id: "s10", text: "Ciepła bluza na wieczór", packed: false },
+              { id: "s11", text: "Bielizna, skarpetki i piżama", packed: false },
+              { id: "s12", text: "Sandały, klapki na basen i buty sportowe", packed: false }
+            ]
+          },
+          {
+            id: "lato_higiena",
+            name: "🧴 Kosmetyczka i Plaża",
+            items: [
+              { id: "s13", text: "Krem z filtrem SPF 50", packed: false },
+              { id: "s14", text: "Ręcznik plażowy i zwykły", packed: false },
+              { id: "s15", text: "Szczoteczka, pasta, żel i szampon", packed: false },
+              { id: "s16", text: "Szczotka do włosów i gumki", packed: false },
+              { id: "s17", text: "Spray na komary", packed: false }
+            ]
+          }
+        ]
+      },
+      narty: {
+        title: "Zimowy Wyjazd na Narty 🎿❄️",
+        tip: "<strong>Tryb Zimowy:</strong> Pakujemy warstwy (bielizna termiczna + polar) oraz sprzęt na stok!",
+        categories: [
+          {
+            id: "stok",
+            name: "⛷️ Na Stok i Śnieg",
+            items: [
+              { id: "z1", text: "Kurtka i spodnie narciarskie", packed: false },
+              { id: "z2", text: "Bielizna termiczna (góra i dół - min. 2 komplety)", packed: false },
+              { id: "z3", text: "Długie skarpety narciarskie (3-4 pary)", packed: false },
+              { id: "z4", text: "Rękawice narciarskie + cienkie rękawiczki", packed: false },
+              { id: "z5", text: "Kask, gogle i kominiarka pod kask", packed: false },
+              { id: "z6", text: "Krem ochronny na mróz z filtrem UV i pomadka", packed: false }
+            ]
+          },
+          {
+            id: "po_nartach",
+            name: "🧣 Po Nartach i Hotel",
+            items: [
+              { id: "z7", text: "Ciepłe buty zimowe (śniegowce)", packed: false },
+              { id: "z8", text: "Ciepła czapka i szalik / komin", packed: false },
+              { id: "z9", text: "Bluzy polarowe, dresy i wygodne koszulki", packed: false },
+              { id: "z10", text: "Kapcie, piżama i bielizna", packed: false },
+              { id: "z11", text: "Kosmetyczka, szczoteczka do zębów i szczotka", packed: false },
+              { id: "z12", text: "Telefon, ładowarka, gry planszowe / karty", packed: false }
+            ]
+          }
+        ]
+      },
+      weekend: {
+        title: "Weekend poza domem / Mazury 🏡🌲",
+        tip: "<strong>Szybki wyjazd:</strong> Krótka lista na 2–3 dni pełne relaksu i dobrej zabawy!",
+        categories: [
+          {
+            id: "wk_podstawa",
+            name: "🎒 Ubrania i Wygoda",
+            items: [
+              { id: "m1", text: "Wygodne dresy / spodnie i bluza", packed: false },
+              { id: "m2", text: "Koszulki, bielizna i skarpetki na 3 dni", packed: false },
+              { id: "m3", text: "Kurtka przeciwdeszczowa i buty sportowe", packed: false },
+              { id: "m4", text: "Piżama i kapcie", packed: false }
+            ]
+          },
+          {
+            id: "wk_rozrywka",
+            name: "🎨 Higiena i Czas Wolny",
+            items: [
+              { id: "m5", text: "Szczoteczka do zębów, pasta i szczotka do włosów", packed: false },
+              { id: "m6", text: "Szkicownik, przybory do rysowania lub książka", packed: false },
+              { id: "m7", text: "Rakieta tenisowa / strój sportowy (opcjonalnie)", packed: false },
+              { id: "m8", text: "Telefon, słuchawki i ładowarka", packed: false }
+            ]
+          }
+        ]
+      }
+    };
+
+    let state = {
+      activePreset: 'wroclaw',
+      filter: 'all',
+      search: '',
+      presetsData: JSON.parse(JSON.stringify(PRESETS))
+    };
+
+    function loadState() {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (parsed && parsed.presetsData) {
+            state = { ...state, ...parsed };
+          }
+        }
+      } catch (e) {
+        console.warn('Błąd odczytu localStorage:', e);
+      }
+    }
+
+    function saveState() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      } catch (e) {
+        console.warn('Błąd zapisu localStorage:', e);
+      }
+    }
+
+    function getCurrentPresetObj() {
+      return state.presetsData[state.activePreset];
+    }
+
+    function renderCategorySelect() {
+      const select = document.getElementById('newItemCategory');
+      const preset = getCurrentPresetObj();
+      select.innerHTML = '';
+      preset.categories.forEach(cat => {
+        const opt = document.createElement('option');
+        opt.value = cat.id;
+        opt.textContent = cat.name;
+        select.appendChild(opt);
+      });
+    }
+
+    function updateProgressUI() {
+      const preset = getCurrentPresetObj();
+      let total = 0;
+      let packed = 0;
+      preset.categories.forEach(cat => {
+        cat.items.forEach(item => {
+          total++;
+          if (item.packed) packed++;
+        });
+      });
+
+      const pct = total === 0 ? 0 : Math.round((packed / total) * 100);
+      document.getElementById('progressCountText').textContent = `Spakowano: ${packed} z ${total} rzeczy`;
+      document.getElementById('progressPctText').textContent = `${pct}%`;
+      document.getElementById('progressFill').style.width = `${pct}%`;
+
+      const msgEl = document.getElementById('progressMessage');
+      const bannerEl = document.getElementById('celebrationBanner');
+
+      if (total > 0 && pct === 100) {
+        msgEl.textContent = "Wszystko gotowe! Udanej wycieczki Helenka! 🌟";
+        bannerEl.classList.add('show');
+      } else {
+        bannerEl.classList.remove('show');
+        if (pct === 0) {
+          msgEl.textContent = "Zaczynamy pakowanie! Odznaczaj rzeczy po włożeniu do torby ✨";
+        } else if (pct < 50) {
+          msgEl.textContent = "Świetny początek! Tak trzymaj 💪";
+        } else if (pct < 85) {
+          msgEl.textContent = "Już ponad połowa za Tobą! Coraz bliżej mety 🚀";
+        } else {
+          msgEl.textContent = "Ostatnia prosta! Zostało już tylko kilka drobiazgów 🔥";
+        }
+      }
+    }
+
+    function renderApp() {
+      const preset = getCurrentPresetObj();
+
+      // Header & Tip
+      const titleInput = document.getElementById('tripTitleInput');
+      if (document.activeElement !== titleInput) {
+        titleInput.value = preset.title;
+      }
+      document.getElementById('tipText').innerHTML = preset.tip;
+
+      // Preset buttons
+      document.querySelectorAll('.preset-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.preset === state.activePreset);
+      });
+
+      // Filter buttons
+      document.querySelectorAll('.filter-tab').forEach(tab => {
+        tab.classList.toggle('active', tab.dataset.filter === state.filter);
+      });
+
+      renderCategorySelect();
+      updateProgressUI();
+
+      // Categories list
+      const container = document.getElementById('categoriesContainer');
+      container.innerHTML = '';
+
+      const query = state.search.trim().toLowerCase();
+      let anyVisible = false;
+
+      preset.categories.forEach(cat => {
+        const totalCat = cat.items.length;
+        const packedCat = cat.items.filter(i => i.packed).length;
+        const catPct = totalCat === 0 ? 0 : Math.round((packedCat / totalCat) * 100);
+
+        const filteredItems = cat.items.filter(item => {
+          if (state.filter === 'unpacked' && item.packed) return false;
+          if (state.filter === 'packed' && !item.packed) return false;
+          if (query && !item.text.toLowerCase().includes(query)) return false;
+          return true;
+        });
+
+        if (filteredItems.length === 0 && (query || state.filter !== 'all')) {
+          return;
+        }
+
+        anyVisible = true;
+
+        const card = document.createElement('section');
+        card.className = 'category-card';
+
+        const isDone = totalCat > 0 && packedCat === totalCat;
+
+        card.innerHTML = `
+          <div class="category-header">
+            <div class="category-title">${cat.name}</div>
+            <div class="category-count ${isDone ? 'done' : ''}">${packedCat}/${totalCat}</div>
+          </div>
+          <div class="cat-progress-track">
+            <div class="cat-progress-fill ${isDone ? 'done' : ''}" style="width: ${catPct}%"></div>
+          </div>
+        `;
+
+        const ul = document.createElement('ul');
+        ul.className = 'item-list';
+
+        filteredItems.forEach(item => {
+          const li = document.createElement('li');
+          li.className = `item-row ${item.packed ? 'packed' : ''}`;
+          li.innerHTML = `
+            <div class="item-left">
+              <div class="checkbox-custom">${item.packed ? '✓' : ''}</div>
+              <span class="item-text"></span>
+            </div>
+            <button type="button" class="delete-item-btn" title="Usuń z listy" aria-label="Usuń">✕</button>
+          `;
+          li.querySelector('.item-text').textContent = item.text;
+
+          li.addEventListener('click', (e) => {
+            if (e.target.closest('.delete-item-btn')) return;
+            item.packed = !item.packed;
+            saveState();
+            renderApp();
+          });
+
+          li.querySelector('.delete-item-btn').addEventListener('click', (e) => {
+            e.stopPropagation();
+            cat.items = cat.items.filter(i => i.id !== item.id);
+            saveState();
+            renderApp();
+          });
+
+          ul.appendChild(li);
+        });
+
+        card.appendChild(ul);
+        container.appendChild(card);
+      });
+
+      if (!anyVisible) {
+        container.innerHTML = `<div class="empty-state">Brak rzeczy pasujących do obecnego widoku 🕵️‍♀️</div>`;
+      }
+    }
+
+    // Event Listeners
+    document.getElementById('tripTitleInput').addEventListener('input', (e) => {
+      getCurrentPresetObj().title = e.target.value;
+      saveState();
+    });
+
+    document.getElementById('presetButtons').addEventListener('click', (e) => {
+      const btn = e.target.closest('.preset-btn');
+      if (!btn) return;
+      state.activePreset = btn.dataset.preset;
+      saveState();
+      renderApp();
+    });
+
+    document.querySelectorAll('.filter-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        state.filter = tab.dataset.filter;
+        saveState();
+        renderApp();
+      });
+    });
+
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+      state.search = e.target.value;
+      renderApp();
+    });
+
+    document.getElementById('addItemForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const input = document.getElementById('newItemInput');
+      const select = document.getElementById('newItemCategory');
+      const text = input.value.trim();
+      if (!text) return;
+
+      const preset = getCurrentPresetObj();
+      const cat = preset.categories.find(c => c.id === select.value) || preset.categories[0];
+      cat.items.push({
+        id: 'custom_' + Date.now(),
+        text: text,
+        packed: false
+      });
+
+      input.value = '';
+      saveState();
+      renderApp();
+    });
+
+    // Confirmation Modal Logic
+    let pendingConfirmAction = null;
+    const modal = document.getElementById('confirmModal');
+
+    function openConfirm(title, desc, onConfirm) {
+      document.getElementById('modalTitle').textContent = title;
+      document.getElementById('modalDesc').textContent = desc;
+      pendingConfirmAction = onConfirm;
+      modal.classList.add('open');
+    }
+
+    document.getElementById('modalCancelBtn').addEventListener('click', () => {
+      modal.classList.remove('open');
+      pendingConfirmAction = null;
+    });
+
+    document.getElementById('modalConfirmBtn').addEventListener('click', () => {
+      if (pendingConfirmAction) pendingConfirmAction();
+      modal.classList.remove('open');
+      pendingConfirmAction = null;
+    });
+
+    document.getElementById('unpackAllBtn').addEventListener('click', () => {
+      openConfirm(
+        'Rozpakować wszystko?',
+        'Wszystkie rzeczy na obecnej liście zostaną odznaczone jako niespakowane (0%). Przydatne przed powrotem z wycieczki do domu!',
+        () => {
+          const preset = getCurrentPresetObj();
+          preset.categories.forEach(cat => cat.items.forEach(i => i.packed = false));
+          saveState();
+          renderApp();
+        }
+      );
+    });
+
+    document.getElementById('resetDefaultBtn').addEventListener('click', () => {
+      openConfirm(
+        'Przywrócić domyślną listę?',
+        'Ten szablon wyjazdu wróci do pierwotnej wersji. Dopisane ręcznie rzeczy w tym szablonie zostaną zresetowane.',
+        () => {
+          state.presetsData[state.activePreset] = JSON.parse(JSON.stringify(PRESETS[state.activePreset]));
+          saveState();
+          renderApp();
+        }
+      );
+    });
+
+    // Network Status Indicator
+    function updateOnlineStatus() {
+      const textEl = document.getElementById('networkText');
+      if (navigator.onLine) {
+        textEl.textContent = 'Gotowa offline';
+      } else {
+        textEl.textContent = 'Tryb offline ✓';
+      }
+    }
+    window.addEventListener('online', updateOnlineStatus);
+    window.addEventListener('offline', updateOnlineStatus);
+
+    // Register Service Worker for Offline PWA
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(err => {
+          console.log('SW registration note:', err);
+        });
+      });
+    }
+
+    // Init
+    loadState();
+    updateOnlineStatus();
+    renderApp();
+  </script>
+</body>
+</html>

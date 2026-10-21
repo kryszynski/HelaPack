@@ -1,0 +1,25 @@
+{
+  "name": "Plecak Helenki - Lista Pakowania",
+  "short_name": "Plecak Helenki",
+  "description": "Interaktywna lista pakowania dla Helenki na wycieczkę do Wrocławia i kolejne wyprawy!",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#F5F3FF",
+  "theme_color": "#7C3AED",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "./icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
