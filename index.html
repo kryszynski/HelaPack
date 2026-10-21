@@ -1178,16 +1178,16 @@
     });
 
     // Network Status Indicator
-    function updateOnlineStatus() {
-      const textEl = document.getElementById('networkText');
-      if (navigator.onLine) {
-        textEl.textContent = 'Gotowa offline';
-      } else {
-        textEl.textContent = 'Tryb offline ✓';
-      }
-    }
-    window.addEventListener('online', updateOnlineStatus);
-    window.addEventListener('offline', updateOnlineStatus);
+   // function updateOnlineStatus() {
+    //  const textEl = document.getElementById('networkText');
+    //  if (navigator.onLine) {
+    //    textEl.textContent = 'Gotowa offline';
+    //  } else {
+    //    textEl.textContent = 'Tryb offline ✓';
+     // }
+    //}
+    //window.addEventListener('online', updateOnlineStatus);
+    //window.addEventListener('offline', updateOnlineStatus);
 
     // Register Service Worker for Offline PWA
     if ('serviceWorker' in navigator) {
